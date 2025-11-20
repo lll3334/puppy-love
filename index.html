@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>小狗的情书</title>
+    <style>
+        /* CSS 样式：定义页面外观 */
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background-color: #ffe4e1; /* 淡粉色背景 */
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            text-align: center;
+        }
+
+        .container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .puppy-image {
+            /* 关键修改：固定为图片的原始尺寸 400x400，以确保热区坐标准确 */
+            width: 400px; 
+            height: 400px;
+            display: block;
+            margin: 0 auto;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    
+<img id="puppyImage" class="puppy-image" src="" alt="小狗的情书" usemap="#puppyMap">
+
+    
+<map name="puppyMap" id="puppyMap">
+    </map>
+</div>
+
+<script>
+    // JavaScript 逻辑：处理交互和概率
+
+    const images = {
+        '1': '1.png',
+        '2': '2.png',
+        '3': '3.png',
+        '4': '4.png'
+    };
+
+    // DOM 元素引用
+    const puppyImage = document.getElementById('puppyImage');
+    const puppyMap = document.getElementById('puppyMap');
+
+    /**
+     * 定义每张图片（图1, 图2）的按钮热区坐标和对应的动作。
+     * 坐标基于 400x400 像素的原始图片尺寸。
+     */
+    const hotspotData = {
+        '1': [ // 图1的热区数据
+            {
+                // 图1：“是”按钮坐标：87, 285, 308, 318
+                coords: "87,285,308,318", 
+                action: () => handleChoice() // 点击“是”：50% 概率跳转
+            },
+            {
+                // 图1：“否”按钮坐标：87, 332, 308, 365
+                coords: "87,332,308,365", 
+                action: () => showState('2') // 点击“否”：跳转到图2
+            }
+        ],
+        '2': [ // 图2的热区数据
+            {
+                // 图2：第一个“是”按钮坐标（位置与图1的“是”相同）
+                coords: "87,285,308,318", 
+                action: () => handleChoice() // 点击第一个“是”：50% 概率跳转
+            },
+            {
+                // 图2：第二个“是”按钮坐标（位置与图1的“否”相同）
+                coords: "87,332,308,365", 
+                action: () => handleChoice() // 点击第二个“是”：50% 概率跳转
+            }
+        ]
+        // 图3和图4没有可点击按钮，所以不需要热区数据
+    };
+
+    /**
+     * @param {string} stateKey - 要切换到的状态 ('1', '2', '3', '4')
+     */
+    function showState(stateKey) {
+        // 1. 更新图片
+        puppyImage.src = images[stateKey];
+
+        // 2. 清空当前的热区
+        puppyMap.innerHTML = '';
+
+        // 3. 根据状态添加新的热区
+        if (hotspotData[stateKey]) {
+            hotspotData[stateKey].forEach(areaInfo => {
+                const area = document.createElement('area');
+                area.shape = 'rect'; // 矩形热区
+                area.coords = areaInfo.coords;
+                area.href = 'javascript:void(0)'; // 防止跳转，只执行JS
+                area.alt = 'Button';
+                area.onclick = areaInfo.action;
+                puppyMap.appendChild(area);
+            });
+            puppyImage.useMap = '#puppyMap'; // 确保图片关联到map
+        } else {
+            puppyImage.removeAttribute('usemap'); // 移除map关联，因为没有按钮了
+        }
+    }
+
+    /**
+     * 处理需要50%概率跳转的逻辑
+     */
+    function handleChoice() {
+        const randomNumber = Math.random(); // 生成一个 0 到 1 之间的随机数
+
+        if (randomNumber < 0.5) { // 50% 的概率：显示图3（告白）
+            showState('3');
+        } else { // 另外 50% 的概率：显示图4（被骗）
+            showState('4');
+        }
+    }
+
+    // 网站加载完成后，首先显示图1
+    document.addEventListener('DOMContentLoaded', () => {
+        showState('1');
+    });
+
+</script>
+</body>
+</html>
